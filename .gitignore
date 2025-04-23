@@ -16,3 +16,6 @@ __pycache__/
 env.bak/
 venv.bak/
 .DS_Store
+
+# Specific files to ignore
+dummy.ipynb
