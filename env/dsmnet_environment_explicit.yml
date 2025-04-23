@@ -1,0 +1,30 @@
+name: dsmnet
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - ipykernel
+  - mamba
+  - python=3.9
+  - jupyter
+  - tensorflow-gpu
+  - cudatoolkit
+  - cudnn
+  - tensorflow
+  - scipy
+  - scikit-learn
+  - pandas
+  - matplotlib
+  - seaborn
+  - tifffile
+  - numpy
+  - jupyterlab
+  - ca-certificates
+  - certifi
+  - openssl
+  - scikit-image
+  - opencv
+  - pillow
+prefix: /home/asfand/.conda/envs/bhe_tf
+
