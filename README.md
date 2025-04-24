@@ -1,4 +1,4 @@
-## DSMNet altered
+## DSMNet extended
 
 ### About
 
