@@ -95,7 +95,7 @@ These detailed steps collectively enhance the accuracy and robustness of edge de
    Finally, the Canny edge detection algorithm is used on the processed binary image. This algorithm involves noise reduction, gradient calculation, non-maximum suppression, and double thresholding to identify and refine edges within the image. The output is an edgemap highlighting potential building outlines and other significant edges present in the nDSM data.
 
 <p align="center">
-  <img  src="./images/fig 7 - edge map generation.jpg"  alt="Potential edgemap generation out of heightmaps"  style="width: 700px; height: 300px;">
+  <img  src="./images/edge_map_generation.jpg"  alt="Potential edgemap generation out of heightmaps"  style="width: 700px; height: 300px;">
 </p>
 
 The above figure demonstrates the detection of potential rooftop areas out of our proposed algorithm. *However, you may notice that due to the presence of some other objects like trees which are elevated like buildings, this technique falls short on isolating man-made constructions like houses out of digital surface models. Nevertheless, we proceed with this type of on-the-fly generated annotation to further enhance the prediction of pixelwise heightmaps.*

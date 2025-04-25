@@ -19,3 +19,4 @@ venv.bak/
 
 # Specific files to ignore
 dummy.ipynb
+push_to_all_repos.sh

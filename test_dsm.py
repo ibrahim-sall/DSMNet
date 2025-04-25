@@ -127,7 +127,7 @@ def test_dsm(mtl, dae, mode, save_test=False, verbose=False):
 
         end = time.time()
 
-        # Finalize Gaussian smoothing
+        # Finalize Gaussian smoothing 
         dsm_pred = np.divide(dsm_pred, gaussian)
         sem_pred = np.divide(sem_pred, gaussian[:, :, np.newaxis])
 

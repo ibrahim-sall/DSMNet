@@ -196,8 +196,5 @@ elif dataset_name.startswith('DFC2023'):
 semantic_label_map = {k: v for k, v in enumerate(label_codes)}
 sem_k = len(semantic_label_map)
 
-# Flag to enable binary classification mode for semantic segmentation
-# If True, the model will perform binary classification instead of multi-class segmentation
+# Check if the dataset is binary classification based on label codes
 binary_classification_flag = len(label_codes) == 2 and set(label_codes) == {0, 1}
-class_of_interest = 1  # Class of interest for binary classification mode based on the dataset (e.g., building class)
-

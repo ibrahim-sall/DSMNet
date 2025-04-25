@@ -512,7 +512,7 @@ def convert_sem_onehot_to_annotation(sem_onehot):
 
     Returns:
     - numpy.ndarray: The semantic annotation in the format of the ground truth, either RGB image or single-channel class labels.
-    """
+    """ 
     # Step 1: Convert the softmax probabilities into class predictions (one-hot encoded format)
     class_predictions = np.argmax(sem_onehot, axis=-1)  # Shape: (H, W), class with highest probability
     

@@ -167,7 +167,7 @@ for epoch in range(1, mtl_numEpochs + 1):
             L3 = REG_LOSS(norm_batch, norm_out) if norm_flag else tf.constant(0, dtype=tf.float32)
             L4 = REG_LOSS(edge_batch.squeeze(), tf.squeeze(edge_out)) if edge_flag else tf.constant(0, dtype=tf.float32)
 
-            # Check for NaN values in loss components
+            # Check for NaN values in loss components 
             if tf.math.is_nan(L1) or tf.math.is_nan(L2) or tf.math.is_nan(L3) or tf.math.is_nan(L4):
                 logger.error(f"NaN detected in loss values:")
                 logger.error(f"L1 (DSM loss): {L1}")

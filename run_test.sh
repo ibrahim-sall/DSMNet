@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To run the script, execute the following command:
+# To run the script, execute the following command: 
 # chmod +x run_test.sh && ./run_test.sh
 
 echo "Starting testing with correction=False (MTL mode)..."

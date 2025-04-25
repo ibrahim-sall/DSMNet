@@ -159,7 +159,7 @@ for epoch in range(1, dae_numEpochs + 1):
         correctionList = [dsm_out] + correctionList + [rgb_batch]
         correctionInput = tf.concat(correctionList, axis=-1)
 
-        # Call the DAE model and compute the loss function
+        # Call the DAE model and compute the loss function 
         # DAE output is contemplated noise here for the MTL output which serves as the DSM first guess
         with tf.GradientTape() as tape:
             noise = dae.call(correctionInput, training=True)

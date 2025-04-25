@@ -20,7 +20,7 @@ def update_confusion_matrix(pred, target):
         
     Returns:
         np.ndarray: Updated confusion matrix stats to be added to the main confusion matrix
-    """
+    """ 
     num_classes = len(semantic_label_map)
     
     # Create inverse mapping from label values to indices
