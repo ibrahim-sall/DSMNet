@@ -8,9 +8,9 @@ dependencies:
   - mamba
   - python=3.9
   - jupyter
-  - tensorflow-gpu
+  # - tensorflow-gpu
   - cudatoolkit
-  - cudnn
+  # - cudnn
   - tensorflow
   - scipy
   - scikit-learn
@@ -26,5 +26,3 @@ dependencies:
   - scikit-image
   - opencv
   - pillow
-prefix: /home/asfand/.conda/envs/bhe_tf
-

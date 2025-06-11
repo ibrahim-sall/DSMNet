@@ -1,0 +1,75 @@
+2025-06-10 15:42:30,692 - INFO - 
+MTL training on Vaihingen just started at 2025-06-10 15:42:30!
+
+2025-06-10 15:42:30,693 - INFO - Number of training samples: 13
+
+2025-06-10 15:42:33,869 - INFO - 
+epoch 1/3 just started!
+
+2025-06-10 15:42:33,877 - INFO - Current epoch: 1
+2025-06-10 15:42:33,877 - INFO - Current LR:    0.001
+2025-06-10 15:42:49,642 - INFO - epoch: 1/3	train_iter: 1/25	total_loss: 7.006403	batch_rmse: 255.005249
+2025-06-10 15:43:42,234 - INFO - epoch: 1/3	train_iter: 2/25	total_loss: 7.004427	batch_rmse: 254.977707
+2025-06-10 15:44:42,751 - INFO - epoch: 1/3	train_iter: 3/25	total_loss: 7.000872	batch_rmse: 254.933075
+2025-06-10 15:45:57,446 - INFO - epoch: 1/3	train_iter: 4/25	total_loss: 6.984061	batch_rmse: 254.755341
+2025-06-10 15:47:15,897 - INFO - epoch: 1/3	train_iter: 5/25	total_loss: 6.963783	batch_rmse: 253.897125
+2025-06-10 15:48:25,668 - INFO - iteration no: 5
+2025-06-10 15:48:25,675 - INFO - ###  MTL TRAIN AVERAGE LOSS VALUES FOR 5 BATCHES  ###
+2025-06-10 15:48:25,679 - INFO - average total wloss : 6.991910
+2025-06-10 15:48:25,680 - INFO - average DSM loss    : 64879.242188
+2025-06-10 15:48:25,683 - INFO - average DSM RMSE    : 254.713699
+2025-06-10 15:48:25,685 - INFO - average SEM loss    : 1.798160
+2025-06-10 15:48:25,686 - INFO - average NORM loss   : 32416.880859
+2025-06-10 15:49:07,723 - INFO - epoch: 1/3	train_iter: 6/25	total_loss: 6.832516	batch_rmse: 251.399948
+2025-06-10 15:50:24,809 - INFO - epoch: 1/3	train_iter: 7/25	total_loss: 6.227661	batch_rmse: 234.761993
+2025-06-10 15:51:38,307 - INFO - epoch: 1/3	train_iter: 8/25	total_loss: 10.082478	batch_rmse: 297.566986
+2025-06-10 15:52:50,424 - INFO - epoch: 1/3	train_iter: 9/25	total_loss: 5.936690	batch_rmse: 228.739700
+2025-06-10 15:54:02,896 - INFO - epoch: 1/3	train_iter: 10/25	total_loss: 6.662862	batch_rmse: 246.199432
+2025-06-10 15:54:51,681 - INFO - iteration no: 10
+2025-06-10 15:54:51,683 - INFO - ###  MTL TRAIN AVERAGE LOSS VALUES FOR 5 BATCHES  ###
+2025-06-10 15:54:51,684 - INFO - average total wloss : 7.148441
+2025-06-10 15:54:51,684 - INFO - average DSM loss    : 64425.250000
+2025-06-10 15:54:51,684 - INFO - average DSM RMSE    : 251.733597
+2025-06-10 15:54:51,684 - INFO - average SEM loss    : 3.879369
+2025-06-10 15:54:51,685 - INFO - average NORM loss   : 31797.958984
+2025-06-10 15:55:16,261 - INFO - epoch: 1/3	train_iter: 11/25	total_loss: 6.805079	batch_rmse: 250.562820
+2025-06-10 15:56:22,004 - INFO - epoch: 1/3	train_iter: 12/25	total_loss: 6.880056	batch_rmse: 252.360001
+2025-06-10 15:57:34,582 - INFO - epoch: 1/3	train_iter: 13/25	total_loss: 6.920365	batch_rmse: 253.212219
+2025-06-10 15:58:35,271 - INFO - epoch: 1/3	train_iter: 14/25	total_loss: 6.919562	batch_rmse: 253.646500
+2025-06-10 15:59:37,025 - INFO - epoch: 1/3	train_iter: 15/25	total_loss: 6.944765	batch_rmse: 253.974457
+2025-06-10 16:00:33,010 - INFO - iteration no: 15
+2025-06-10 16:00:33,013 - INFO - ###  MTL TRAIN AVERAGE LOSS VALUES FOR 5 BATCHES  ###
+2025-06-10 16:00:33,014 - INFO - average total wloss : 6.893965
+2025-06-10 16:00:33,014 - INFO - average DSM loss    : 63884.707031
+2025-06-10 16:00:33,014 - INFO - average DSM RMSE    : 252.751190
+2025-06-10 16:00:33,014 - INFO - average SEM loss    : 1.824299
+2025-06-10 16:00:33,014 - INFO - average NORM loss   : 32306.480469
+2025-06-10 16:00:59,355 - INFO - epoch: 1/3	train_iter: 16/25	total_loss: 6.951914	batch_rmse: 254.149384
+2025-06-10 16:02:23,838 - INFO - epoch: 1/3	train_iter: 17/25	total_loss: 6.954292	batch_rmse: 254.259064
+2025-06-10 16:03:37,844 - INFO - epoch: 1/3	train_iter: 18/25	total_loss: 6.957696	batch_rmse: 254.325531
+2025-06-10 16:04:41,975 - INFO - epoch: 1/3	train_iter: 19/25	total_loss: 6.964907	batch_rmse: 254.359314
+2025-06-10 16:05:48,712 - INFO - epoch: 1/3	train_iter: 20/25	total_loss: 6.960731	batch_rmse: 254.379486
+2025-06-10 16:06:32,623 - INFO - iteration no: 20
+2025-06-10 16:06:32,624 - INFO - ###  MTL TRAIN AVERAGE LOSS VALUES FOR 5 BATCHES  ###
+2025-06-10 16:06:32,626 - INFO - average total wloss : 6.957908
+2025-06-10 16:06:32,626 - INFO - average DSM loss    : 64665.738281
+2025-06-10 16:06:32,627 - INFO - average DSM RMSE    : 254.294556
+2025-06-10 16:06:32,627 - INFO - average SEM loss    : 1.677827
+2025-06-10 16:06:32,627 - INFO - average NORM loss   : 32355.130859
+2025-06-10 16:06:54,615 - INFO - epoch: 1/3	train_iter: 21/25	total_loss: 6.958261	batch_rmse: 254.354935
+2025-06-10 16:07:54,557 - INFO - epoch: 1/3	train_iter: 22/25	total_loss: 6.954411	batch_rmse: 254.268448
+2025-06-10 16:08:52,607 - INFO - epoch: 1/3	train_iter: 23/25	total_loss: 6.858494	batch_rmse: 252.386780
+2025-06-10 16:09:53,975 - INFO - epoch: 1/3	train_iter: 24/25	total_loss: 5.739303	batch_rmse: 229.260376
+2025-06-10 16:10:57,924 - INFO - epoch: 1/3	train_iter: 25/25	total_loss: 8.896213	batch_rmse: 286.040039
+2025-06-10 16:11:35,085 - INFO - iteration no: 25
+2025-06-10 16:11:35,088 - INFO - ###  MTL TRAIN AVERAGE LOSS VALUES FOR 5 BATCHES  ###
+2025-06-10 16:11:35,092 - INFO - average total wloss : 7.081336
+2025-06-10 16:11:35,093 - INFO - average DSM loss    : 65938.304688
+2025-06-10 16:11:35,093 - INFO - average DSM RMSE    : 255.262115
+2025-06-10 16:11:35,093 - INFO - average SEM loss    : 1.642755
+2025-06-10 16:11:35,093 - INFO - average NORM loss   : 32323.056641
+2025-06-10 16:11:35,093 - INFO - 
+epoch 1/3 just finished after 1741.22399187 sec!
+
+2025-06-10 16:11:35,093 - INFO - Computing average validation errors out of the partially trained model after epoch 1 ...
+

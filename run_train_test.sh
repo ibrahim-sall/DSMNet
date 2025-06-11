@@ -5,7 +5,7 @@
 
 
 echo "Starting MTL training..."
-sed -i 's/correction = .*/correction = False/' config.py
+sed -i '' 's/correction = .*/correction = False/' config.py
 python train_mtl.py
 if [ $? -ne 0 ]; then
     echo "MTL training failed"
@@ -16,7 +16,7 @@ echo "Waiting 30 seconds for checkpoints and GPU cooldown..."
 sleep 30
 
 echo -e "\nStarting MTL testing..."
-sed -i 's/correction = .*/correction = False/' config.py
+sed -i '' 's/correction = .*/correction = False/' config.py
 python test_dsm.py
 if [ $? -ne 0 ]; then
     echo "Testing failed"
@@ -27,7 +27,7 @@ echo "Waiting 30 seconds for checkpoints and GPU cooldown..."
 sleep 30
 
 echo -e "\nStarting DAE training..."
-sed -i 's/correction = .*/correction = True/' config.py
+sed -i '' 's/correction = .*/correction = True/' config.py
 python train_dae.py
 if [ $? -ne 0 ]; then
     echo "DAE training failed"
@@ -38,7 +38,7 @@ echo "Waiting 30 seconds for checkpoints and GPU cooldown..."
 sleep 30
 
 echo -e "\nStarting DAE testing..."
-sed -i 's/correction = .*/correction = True/' config.py
+sed -i '' 's/correction = .*/correction = True/' config.py
 python test_dsm.py
 if [ $? -ne 0 ]; then
     echo "Testing failed"

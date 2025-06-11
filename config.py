@@ -14,12 +14,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # 0 = all messages, 1 = filter out INF
 # Options include Vaihingen, Vaihingen_crp256, DFC2018, DFC2018_crp256, DFC2019_crp256, DFC2019_crp256_bin, DFC2019_crp512, 
 # and DFC2023 derivatives as follows:
 # DFC2023A (Ahmad's splitting), DFC2023Asmall, DFC2023Amini, and DFC2023S (Sinan's splitting) datasets
-dataset_name = 'DFC2019_crp256'  # Change this to the desired dataset name
+dataset_name = 'Vaihingen'  # Change this to the desired dataset name
 
 # Shortcut path to the datasets parent folder
 # Because these files may be voluminous, thus you may put them inside another folder to be 
 # globally available to other projects as well. You should end the path with a '/'
-shortcut_path = '../datasets/'  # Change this to the desired path
+shortcut_path = '../data.nosync/dataset_dsmnet/'  # Change this to the desired path
 
 # Whether the input image tile is large, thus random patches are selected out of that, (DFC2018 and Vaihingen)
 # Or the input image is like a normal patch, thus as a whole could be fed to the model, (DFC2023)
@@ -40,7 +40,6 @@ dataset_configs = {
     'DFC2019_crp512': (512, 2),
     'DFC2023': (512, 2),
 }
-
 # Get cropSize and batchSize based on dataset name, with fallback logic
 # First try exact match, then prefix match, then default to (256, 2)
 if dataset_name in dataset_configs:
@@ -71,29 +70,29 @@ normalize_flag = False
 
 # Parameters for the Multitask Learning (MTL) component
 mtl_lr_decay = False  # Flag to enable/disable learning rate decay
-mtl_lr = 0.0002  # Initial learning rate for the MTL network
+mtl_lr =0.001   # Initial learning rate for the MTL network
 mtl_batchSize = batch_size  # Batch size for training the MTL network, now dynamic based on dataset
-mtl_numEpochs = 1000  # Number of epochs for training the MTL network
+mtl_numEpochs = 3  # Number of epochs for training the MTL network (reduced)
 
 # Total number of training samples available for MTL generated out of data augmentation technique for large tiles, 
 # o.w. for input data as patches, the true number of training samples will be used accordingly
-mtl_training_samples = 10000
+mtl_training_samples = 100  # Reduced for quicker experimentation
 # Calculate the total number of iterations required for training based on batch size and samples count
 mtl_train_iters = int(mtl_training_samples / mtl_batchSize)
-mtl_log_freq = int(mtl_train_iters / 5)  # Frequency at which evaluation metrics are calculated during training
+mtl_log_freq = max(1, int(mtl_train_iters / 5))  # Frequency at which evaluation metrics are calculated during training
 mtl_min_loss = float('inf')  # Minimum DSM loss threshold to save the MTL network weights as checkpoints
 
 # Parameters for the Denoising AutoEncoder (DAE) component defined as the same way for MTL
 dae_lr_decay = False
-dae_lr = 0.0002
+dae_lr = 0.001 
 dae_batchSize = batch_size  # Batch size for training the DAE network, now dynamic based on dataset
-dae_numEpochs = 1000
+dae_numEpochs = 3  # Reduced for quicker experimentation
 
 # Total number of training samples available for DAE generated out of data augmentation technique for large tiles, 
 # o.w. for input data as patches, the true number of training samples will be used accordingly
-dae_training_samples = 10000
+dae_training_samples = 100  # Reduced for quicker experimentation
 dae_train_iters = int(dae_training_samples / dae_batchSize)
-dae_log_freq = int(dae_train_iters / 5)
+dae_log_freq = max(1, int(dae_train_iters / 5))
 dae_min_loss = float('inf')  # Minimum loss (DSM noise) threshold to save the DAE network weights as checkpoints
 
 # MTL saved weights preloading mode. If True, then all MTL model will be initialized with saved weights before training
@@ -167,7 +166,7 @@ mtl_head_mode = 'dsm'  # 'full' or 'dsm'
 
 # Set flag for applying denoising autoencoder during testing. 
 # Note: If set to True, this will affect train/valid error computations
-correction = True
+correction = False
 
 # Define label codes for semantic segmentation task, and
 # scaling factors (weights) for different types of loss functions in MTL
