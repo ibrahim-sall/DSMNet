@@ -21,13 +21,13 @@ from tifffile import *
 
 import sys
 
-datasetName=sys.argv[1] #Vaihingen, DFC2018
-if(sys.argv[2]=='False'): correction=False
-else: correction=True
+datasetName='Vaihingen'
+
+correction=False
 
 cropSize=320
 
-predCheckPointPath='./checkpoints/'+datasetName+'/mtl'
+predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
 corrCheckPointPath='./checkpoints/'+datasetName+'/refinement'
 
 val_rgb, val_dsm, val_sem = collect_tilenames("val",datasetName)
@@ -39,6 +39,8 @@ print("number of validation samples " + str(NUM_VAL_IMAGES))
 backboneNet=DenseNet121(weights='imagenet', include_top=False, input_tensor=Input(shape=(cropSize,cropSize,3)))
 
 net = MTL(backboneNet, datasetName)
+random_input = np.zeros((1, cropSize, cropSize, 3), dtype=np.float32)
+net(random_input, training=False)
 net.load_weights(predCheckPointPath)
 
 if(correction):
@@ -138,15 +140,3 @@ for tile in range(tilesLen):
 print("Final MSE loss  : " + str(total_mse/tilesLen))
 print("Final MAE loss  : " + str(total_mae/tilesLen))
 print("Final RMSE loss : " + str(total_rmse/tilesLen))
-
-
-
-
-
-
-
-
-
-
-
-

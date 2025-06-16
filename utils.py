@@ -21,7 +21,8 @@ def collect_tilenames(mode, dataset):
 
   if(dataset=='Vaihingen'):
     trainFrames=[1,3,5,7,11,13,15,17,21,23,26,28,30,32,34,37]
-    valFrames=[2,4,6,8,10,12,14,16,20,22,24,27,29,31,33,35,38]
+    #valFrames=[2,4,6,8,10,12,14,16,20,22,24,27,29,31,33,35,38]
+    valFrames=[2,4]
   elif(dataset=='DFC2018'):
     trainFrames = ['UH_NAD83_272056_3289689', 'UH_NAD83_272652_3289689', 'UH_NAD83_273248_3289689', 'UH_NAD83_273844_3289689']
     valFrames = ['UH_NAD83_271460_3289689', 'UH_NAD83_271460_3290290', 'UH_NAD83_272056_3290290', 'UH_NAD83_272652_3290290', 'UH_NAD83_273248_3290290', 'UH_NAD83_273844_3290290', 'UH_NAD83_274440_3289689', 'UH_NAD83_274440_3290290', 'UH_NAD83_275036_3289689', 'UH_NAD83_275036_3290290']
@@ -30,7 +31,7 @@ def collect_tilenames(mode, dataset):
     for i in trainFrames:
       if(dataset=='Vaihingen'):
         all_rgb.append('./datasets/Vaihingen/RGB/top_mosaic_09cm_area'+str(i)+'.tif')
-        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'.jpg')
+        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'_normalized.jpg')
         all_sem.append('./datasets/Vaihingen/SEM/top_mosaic_09cm_area'+str(i)+'.tif')
       elif(dataset=='DFC2018'):
         all_rgb.append('./datasets/DFC2018/RGB/'+i+'.tif')
@@ -41,7 +42,7 @@ def collect_tilenames(mode, dataset):
     for i in valFrames:
       if(dataset=='Vaihingen'):
         all_rgb.append('./datasets/Vaihingen/RGB/top_mosaic_09cm_area'+str(i)+'.tif')
-        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'.jpg')
+        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'_normalized.jpg')
         all_sem.append('./datasets/Vaihingen/SEM/top_mosaic_09cm_area'+str(i)+'.tif')
       elif(dataset=='DFC2018'):
         all_rgb.append('./datasets/DFC2018/RGB/'+i+'.tif')
@@ -103,6 +104,3 @@ def sliding_window(image, step, window_size):
       if y + window_size[1] >= height:
         y = height - window_size[1]
       yield x, x + window_size[0], y, y + window_size[1]
-
-
-

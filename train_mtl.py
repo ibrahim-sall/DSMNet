@@ -9,6 +9,7 @@ from skimage import io
 
 import tensorflow as tf
 import utils
+import gc
 
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import *
@@ -23,7 +24,7 @@ from utils import *
 
 import sys
 
-datasetName=sys.argv[1] #Vaihingen, DFC2018
+datasetName='Vaihingen'
 
 if(datasetName=='DFC2018'):
   label_codes = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
@@ -41,16 +42,18 @@ id2code = {k:v for k,v in enumerate(label_codes)}
 
 decay=False
 save=True
+sem_flag = True
+norm_flag = True 
 
 lr=0.0002
 batchSize=4
 numEpochs=20
-training_samples=10000
-val_freq=1000
+training_samples=1000
+val_freq=100
 train_iters=int(training_samples/batchSize)
 cropSize=320
 
-predCheckPointPath='./checkpoints/'+datasetName+'/mtl'
+predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
 corrCheckPointPath='./checkpoints/'+datasetName+'/refinement'
 
 all_rgb, all_dsm, all_sem = collect_tilenames("train", datasetName)
@@ -62,12 +65,13 @@ NUM_VAL_IMAGES = len(val_rgb)
 backboneNet=DenseNet121(weights='imagenet', include_top=False, input_tensor=Input(shape=(cropSize,cropSize,3)))
 
 net = MTL(backboneNet, datasetName)
+net.call(np.zeros((1, cropSize, cropSize, 3)), training=False)
 
 min_loss=1000
 
 for current_epoch in range(1,numEpochs):
   if(decay and current_epoch>1): lr=lr/2
-  optimizer = tf.keras.optimizers.Adam(lr=lr,beta_1=0.9)
+  optimizer = tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
   print("Current epoch " + str(current_epoch))
   print("Current LR    " + str(lr)) 
@@ -161,6 +165,7 @@ for current_epoch in range(1,numEpochs):
         print('NORM loss  : ' + str(error_L3/val_freq))
 
       if(error_L1/val_freq<min_loss and save):
+        net.build(input_shape=(None, 320, 320, 3))
         net.save_weights(predCheckPointPath)
         min_loss=error_L1/val_freq
         print('dsm train checkpoint saved!')
@@ -174,15 +179,4 @@ for current_epoch in range(1,numEpochs):
   error_L1=0.0
   error_L2=0.0
   error_L3=0.0
-
-
-
-   
-
-  
-
-
-
-
-
 
