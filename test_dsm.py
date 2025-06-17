@@ -24,6 +24,7 @@ import sys
 datasetName='Vaihingen'
 
 correction=False
+sem_flag = True
 
 cropSize=320
 
@@ -136,6 +137,8 @@ for tile in range(tilesLen):
   filename=val_rgb[tile].split('/')[-1].split('.')[0]
   pred = Image.fromarray(pred)
   pred.save('./output/'+datasetName+'/'+filename+'.tif')
+  
+  
 
 print("Final MSE loss  : " + str(total_mse/tilesLen))
 print("Final MAE loss  : " + str(total_mae/tilesLen))

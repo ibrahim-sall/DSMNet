@@ -104,3 +104,4 @@ def sliding_window(image, step, window_size):
       if y + window_size[1] >= height:
         y = height - window_size[1]
       yield x, x + window_size[0], y, y + window_size[1]
+      
