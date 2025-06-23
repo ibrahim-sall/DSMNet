@@ -89,6 +89,7 @@ def correctTile(tile):
 
   return tile
 
+
 def gaussian_kernel(width, height, sigma=0.2, mu=0.0):
   x, y = np.meshgrid(np.linspace(-1, 1, height), np.linspace(-1, 1, height))
   d = np.sqrt(x*x+y*y)
