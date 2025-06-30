@@ -29,7 +29,7 @@ sem_flag = True
 cropSize=320
 
 predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
-corrCheckPointPath='./checkpoints/'+datasetName+'/refinement'
+corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.h5'
 
 val_rgb, val_dsm, val_sem = collect_tilenames("val",datasetName)
 

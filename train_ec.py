@@ -24,8 +24,8 @@ import sys
 
 datasetName=sys.argv[1] #Vaihingen, DFC2018
 
-predCheckPointPath='./checkpoints/'+datasetName+'/mtl'
-corrCheckPointPath='./checkpoints/'+datasetName+'/refinement'
+predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
+corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.weights.h5'
 
 save=True
 
