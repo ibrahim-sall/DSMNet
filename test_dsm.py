@@ -5,6 +5,8 @@ import cv2
 import utils
 import time
 import matplotlib.pyplot as plt
+import glob
+import os
 
 import tensorflow as tf
 
@@ -14,12 +16,14 @@ from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.callbacks import *
 from tensorflow.keras.applications.densenet import DenseNet121
+from PIL import Image
 
 from nets import *
 from utils import *
 from tifffile import *
 
 import sys
+import logging
 
 datasetName='Vaihingen'
 
@@ -42,7 +46,12 @@ backboneNet=DenseNet121(weights='imagenet', include_top=False, input_tensor=Inpu
 net = MTL(backboneNet, datasetName)
 random_input = np.zeros((1, cropSize, cropSize, 3), dtype=np.float32)
 net(random_input, training=False)
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+logger.debug(f"Loading model weights from {predCheckPointPath}")
 net.load_weights(predCheckPointPath)
+logger.debug("Model weights loaded successfully")
 
 if(correction):
   autoencoder=Autoencoder()
@@ -60,86 +69,55 @@ total_mae  = 0
 tile_time  = 0
 total_time = 0
 
-tilesLen=len(val_rgb)
+target_dir = '/home/rha/Documents/ibhou/hambourg/TDOP_20'
+jp2_files = sorted(glob.glob(target_dir + '/*.jp2'))
 
-for tile in range(tilesLen):
+output_dir = './output/hambourg/'
+os.makedirs(output_dir, exist_ok=True)
 
-  print(tile+1)
+tilesLen = len(jp2_files)
 
-  rgb_data=[]
-  dsm_data=[]
+for jp2_path in jp2_files:
+  logger.info(f"Processing {jp2_path}")
+  img = Image.open(jp2_path)
+  if img.mode == 'RGBA':
+    img = img.convert('RGB')
+  elif img.mode == 'L':
+    img = img.convert('RGB')
+  rgb_tile = np.array(img) / 255.0
+  h, w = rgb_tile.shape[:2]
+  if h < cropSize or w < cropSize:
+    pad_h = max(0, cropSize - h)
+    pad_w = max(0, cropSize - w)
+    rgb_tile = np.pad(rgb_tile, ((0, pad_h), (0, pad_w), (0, 0)), mode='reflect')
+    h, w = rgb_tile.shape[:2]
 
-  coordinates=[]
-
-  if(datasetName=='Vaihingen'):
-    rgb_tile = np.array(Image.open(val_rgb[tile]))/255
-    dsm_tile = np.array(Image.open(val_dsm[tile]))/255
-
-  elif(datasetName=='DFC2018'):
-    rgb_tile=np.array(Image.open(val_rgb[tile]))/255
-    dsm_tile=np.array(Image.open(val_dsm[2*tile]))
-    dem_tile=np.array(Image.open(val_dsm[2*tile+1]))
-    dsm_tile=correctTile(dsm_tile)
-    dem_tile=correctTile(dem_tile)
-    dsm_tile=dsm_tile-dem_tile
-
+  coordinates = []
+  rgb_data = []
   for x1, x2, y1, y2 in sliding_window(rgb_tile, step=int(cropSize/6), window_size=(cropSize,cropSize)):
     coordinates.append([y1,y2,x1,x2])
     rgb_data.append(rgb_tile[y1:y2, x1:x2, :])
-    dsm_data.append(dsm_tile[y1:y2, x1:x2])
 
-  pred = np.zeros([2,rgb_tile.shape[0],rgb_tile.shape[1]])
-  prob_matrix = gaussian_kernel(rgb_tile.shape[0],rgb_tile.shape[1])
-
-  start = time.time()
+  pred = np.zeros([2, h, w])
   for crop in range(len(rgb_data)):
-    cropRGB=rgb_data[crop]
-    cropDSM=dsm_data[crop]
-
-    y1,y2,x1,x2=coordinates[crop]
+    cropRGB = rgb_data[crop]
+    y1, y2, x1, x2 = coordinates[crop]
     prob_matrix = gaussian_kernel(cropRGB.shape[0], cropRGB.shape[1])
-
-    dsm_output, sem_output, norm_output = net.call(cropRGB[np.newaxis,...], training=False)
-
-    if(correction):
-      correctionInput = tf.concat([dsm_output, norm_output, sem_output, cropRGB[np.newaxis,...]], axis=-1)
-      noise=autoencoder.call(correctionInput, training=False)
-      dsm_output_copy = dsm_output.numpy().squeeze().copy()
-      dsm_output = dsm_output-noise
-
+    dsm_output, sem_output, norm_output = net.call(cropRGB[np.newaxis, ...], training=False)
     dsm_output = dsm_output.numpy().squeeze()
+    pred[0, y1:y2, x1:x2] += np.multiply(dsm_output, prob_matrix)
+    pred[1, y1:y2, x1:x2] += prob_matrix
 
-    pred[0,y1:y2,x1:x2] += np.multiply(dsm_output, prob_matrix)
-    pred[1,y1:y2,x1:x2] += prob_matrix
-
-  end = time.time()
   gaussian = pred[1]
   pred = np.divide(pred[0], gaussian)
+  pred = pred[:h, :w]
 
-  if(datasetName=='DFC2018'): dsm_tile=dsm_tile[0:pred.shape[0],0:pred.shape[1]]
+  filename = os.path.splitext(os.path.basename(jp2_path))[0]
+  tif_path = os.path.join(output_dir, filename + '.tif')
+  pred_img = Image.fromarray((pred * 255).astype(np.uint8))
+  pred_img.save(tif_path)
+  logger.info(f"Saved {tif_path}")
 
-  tile_mse = np.mean((pred-dsm_tile)**2)
-  total_mse+= tile_mse
-  print("Tile MSE  : " + str(tile_mse))
-
-  tile_mae = np.mean(np.abs(pred-dsm_tile))
-  total_mae+= tile_mae
-  print("Tile MAE  : " + str(tile_mae))
-
-  tile_rmse = np.sqrt(np.mean((pred-dsm_tile)**2))
-  total_rmse+= tile_rmse
-  print("Tile RMSE : " + str(tile_rmse))
-
-  tile_time = end - start
-  total_time+= tile_time
-  print("Tile time : " + str(tile_time))
-  
-  filename=val_rgb[tile].split('/')[-1].split('.')[0]
-  pred = Image.fromarray(pred)
-  pred.save('./output/'+datasetName+'/'+filename+'.tif')
-  
-  
-
-print("Final MSE loss  : " + str(total_mse/tilesLen))
-print("Final MAE loss  : " + str(total_mae/tilesLen))
-print("Final RMSE loss : " + str(total_rmse/tilesLen))
+logger.info("Final MSE loss  : " + str(total_mse/tilesLen))
+logger.info("Final MAE loss  : " + str(total_mae/tilesLen))
+logger.info("Final RMSE loss : " + str(total_rmse/tilesLen))
