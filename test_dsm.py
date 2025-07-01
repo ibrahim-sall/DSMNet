@@ -108,7 +108,7 @@ for jp2_path in jp2_files:
     pred[0, y1:y2, x1:x2] += np.multiply(dsm_output, prob_matrix)
     pred[1, y1:y2, x1:x2] += prob_matrix
 
-  gaussian = pred[1]
+  # gaussian = pred[1]f
   pred = np.divide(pred[0], gaussian)
   pred = pred[:h, :w]
 

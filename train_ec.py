@@ -21,6 +21,7 @@ from nets import *
 from utils import *
 
 import sys
+import logging
 
 datasetName=sys.argv[1] #Vaihingen, DFC2018
 
@@ -31,7 +32,7 @@ save=True
 
 lr=0.0002
 batchSize=2
-numEpochs=20
+numEpochs=100
 training_samples=10000
 val_freq=1000
 cropSize=320
@@ -54,11 +55,18 @@ print("number of validation samples " + str(NUM_VAL_IMAGES))
 
 backboneNet=DenseNet121(weights='imagenet', include_top=False, input_tensor=Input(shape=(cropSize,cropSize,3)))
 
-net=MTL(backboneNet, datasetName)
+net = MTL(backboneNet, datasetName)
+random_input = np.zeros((1, cropSize, cropSize, 3), dtype=np.float32)
+net(random_input, training=False)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.debug(f"Loading model weights from {predCheckPointPath}")
 net.load_weights(predCheckPointPath)
+logger.debug("Model weights loaded successfully")
 
 autoencoder=Autoencoder()
-optimizer=tf.keras.optimizers.Adam(lr=lr,beta_1=0.9)
+optimizer=tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
 min_loss=1000
 
