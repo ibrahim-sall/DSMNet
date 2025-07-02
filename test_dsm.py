@@ -24,6 +24,8 @@ from tifffile import *
 
 import sys
 import logging
+import rasterio
+from rasterio.transform import from_bounds
 
 datasetName='Vaihingen'
 
@@ -79,12 +81,24 @@ tilesLen = len(jp2_files)
 
 for jp2_path in jp2_files:
   logger.info(f"Processing {jp2_path}")
-  img = Image.open(jp2_path)
-  if img.mode == 'RGBA':
-    img = img.convert('RGB')
-  elif img.mode == 'L':
-    img = img.convert('RGB')
-  rgb_tile = np.array(img) / 255.0
+  
+  with rasterio.open(jp2_path) as src:
+    rgb_data = src.read()
+    transform = src.transform
+    crs = src.crs
+    
+    if rgb_data.shape[0] <= 4:
+      rgb_tile = np.transpose(rgb_data, (1, 2, 0))
+    else:
+      rgb_tile = rgb_data
+    
+    if rgb_tile.shape[2] == 4:
+      rgb_tile = rgb_tile[:, :, :3] 
+    elif rgb_tile.shape[2] == 1:
+      rgb_tile = np.repeat(rgb_tile, 3, axis=2)
+    
+    rgb_tile = rgb_tile.astype(np.float32) / 255.0
+    
   h, w = rgb_tile.shape[:2]
   if h < cropSize or w < cropSize:
     pad_h = max(0, cropSize - h)
@@ -108,15 +122,28 @@ for jp2_path in jp2_files:
     pred[0, y1:y2, x1:x2] += np.multiply(dsm_output, prob_matrix)
     pred[1, y1:y2, x1:x2] += prob_matrix
 
-  # gaussian = pred[1]f
+  gaussian = pred[1]
   pred = np.divide(pred[0], gaussian)
   pred = pred[:h, :w]
 
   filename = os.path.splitext(os.path.basename(jp2_path))[0]
   tif_path = os.path.join(output_dir, filename + '.tif')
-  pred_img = Image.fromarray((pred * 255).astype(np.uint8))
-  pred_img.save(tif_path)
-  logger.info(f"Saved {tif_path}")
+  
+  with rasterio.open(
+    tif_path,
+    'w',
+    driver='GTiff',
+    height=pred.shape[0],
+    width=pred.shape[1],
+    count=1,
+    dtype=pred.dtype,
+    crs=crs,
+    transform=transform,
+    compress='lzw'
+  ) as dst:
+    dst.write(pred, 1)
+  
+  logger.info(f"Saved {tif_path} with georeference")
 
 logger.info("Final MSE loss  : " + str(total_mse/tilesLen))
 logger.info("Final MAE loss  : " + str(total_mae/tilesLen))
