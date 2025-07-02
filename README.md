@@ -5,6 +5,86 @@ This repo contains the code and files necessary to reproduce the results publish
 
 ![](/images/fullnet.png)
 
+
+
+## Network
+### Prerequisites
+
+* Python 3.5
+* Tensorflow 2.1 (with Cuda 10.0)
+* Numpy 1.18.4
+
+You can also refer to the `requirements.txt` file for a complete list of dependencies.
+
+### Datasets
+The Vaihingen dataset can be downloaded from the [ISPRS 2D Semantic Labeling Contest page](https://www.isprs.org/resources/datasets/benchmarks/UrbanSemLab/2d-sem-label-vaihingen.aspx?utm_source=chatgpt.com). Please follow the instructions on the website to request access to the data.
+When unzipping the datasets and checkpoints, ensure the following folder structure is maintained:
+
+```
+/
+├── datasets
+│   ├── DFC2018
+│   │   ├── RGB
+│   │   ├── SEM
+│   │   ├── DSM
+│   │   └── DEM
+│   └── Vaihingen
+│       ├── RGB
+│       ├── SEM
+│       └── NDSM
+└── checkpoints
+```
+
+### Training
+To train the Multi-Task Learning (MTL) prediction network, run:  
+```bash
+python train_mtl.py [dataset]
+```
+For example, to train on the DFC2018 dataset:
+```bash
+python train_mtl.py DFC2018
+```
+
+![](/images/mtl_output.png)
+
+Before training the refinement network, ensure you have a trained MTL checkpoint. Then, start training the refinement network with:
+```bash
+python train_ec.py [dataset]
+```
+For example, to train on the Vaihingen dataset:
+```bash
+python train_ec.py Vaihingen
+```
+
+![](/images/refinement_output.png)
+
+### Testing 
+
+To evaluate the height prediction and refinement networks, use the `test_dsm.py` script:
+
+```bash
+python test_dsm.py [dataset] [refinement_flag]
+```
+
+- `[dataset]`: Name of the dataset to test on (`DFC2018` or `Vaihingen`).
+- `[refinement_flag]`: Set to `True` to test both prediction and refinement networks, or `False` to test only the prediction network.
+
+**Examples:**
+
+- Test both prediction and refinement on the DFC2018 dataset:
+      
+      ```bash
+      python test_dsm.py DFC2018 True
+      ```
+- Test only the prediction network on the Vaihingen dataset:
+      
+      ```bash
+      python test_dsm.py Vaihingen False
+      ```
+
+The output files will be saved in the `/output` directory.
+
+
 ### Citation
 If you find our work useful in your research, please consider citing our [paper](https://arxiv.org/pdf/2011.10697.pdf):
 
@@ -19,62 +99,6 @@ If you find our work useful in your research, please consider citing our [paper]
 }
 
 ```
-
-## Network
-### Prerequisites
-
-* Python 3.5
-* Tensorflow 2.1 (with Cuda 10.0)
-* Numpy 1.18.4
-
-### Testing
-Both datasets can be found [here](https://drive.google.com/file/d/1llKA6z5L6CBQA5Fyr92d0Alj9TjhpYWb/view?usp=sharing). The data was organized and seperated into tiles to speed up the training process. No further pre-processing was done. Our checkpoints can be found [here](https://drive.google.com/file/d/1DkMmK1zvypZjqZ9GsIWqtdAO0ocEnTOQ/view?usp=sharing).  
-
-When unzipping the datasets and checkpoints, make sure to respect the following folder structure :  
-  
-/   
--datasets  
---DFC2018  
----RGB  
----SEM  
----DSM  
----DEM  
---Vaihingen  
----RGB  
----SEM  
----NDSM  
--checkpoints  
---DFC2018  
---Vaihingen  
-
-Next, use the test_dsm.py script to test the height prediction and refinement networks by using :  
-**python test_dsm.py [dataset] [refinement_flag]**  
-For example, to test the results of the prediction and refinement networks combined on the DFC2018 dataset, use :  
-python test_dsm.py DFC2018 True  
-To test the results of the prediction network only on the Vaihingen dataset, use :  
-python test_dsm.py Vaihingen False  
-The output files will be saved to the /output folder.  
-
-### Training
-To train your own MTL prediction network, use:  
-**python train_mtl.py [dataset]**  
-For example, to train the MTL prediction network on the DFC2018 dataset, use :    
-python train_mtl.py DFC2018   
-  
-<p align="center">
-<img src="/images/mtl_output.png" width="500" height="400"/>  
-</p>
-
-To train your own refinement network, first you'll need a checkpoint for the MT prediction network, then you can use:  
-**python train_ec.py [dataset]**    
-For example, to train the refinement network on the Vaihingen dataset, use :    
-python train_ec.py Vaihingen   
-  
-
-<p align="center">
-<img src="/images/refinement_output.png" width="500" height="400"/> 
-</p>
-
 
 
 
