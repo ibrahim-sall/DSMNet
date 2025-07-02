@@ -49,6 +49,7 @@ print(val_rgb)
 
 NUM_TRAIN_IMAGES = len(all_rgb)
 NUM_VAL_IMAGES = len(val_rgb)
+NUM_CLASSES = 6 if datasetName == 'Vaihingen' else 8 
 
 print("number of training samples " + str(NUM_TRAIN_IMAGES))
 print("number of validation samples " + str(NUM_VAL_IMAGES))
@@ -66,6 +67,10 @@ net.load_weights(predCheckPointPath)
 logger.debug("Model weights loaded successfully")
 
 autoencoder=Autoencoder()
+
+
+sample_input = tf.zeros((1, cropSize, cropSize, 3 + 1 + NUM_CLASSES + 3), dtype=tf.float32)
+autoencoder(sample_input, training=False)
 optimizer=tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
 min_loss=1000

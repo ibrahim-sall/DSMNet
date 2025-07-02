@@ -27,7 +27,7 @@ import logging
 
 datasetName='Vaihingen'
 
-correction=False
+correction=True
 sem_flag = True
 
 cropSize=320
