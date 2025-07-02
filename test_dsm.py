@@ -35,7 +35,7 @@ sem_flag = True
 cropSize=320
 
 predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
-corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.h5'
+corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.weights.h5'
 
 val_rgb, val_dsm, val_sem = collect_tilenames("val",datasetName)
 
@@ -56,7 +56,15 @@ net.load_weights(predCheckPointPath)
 logger.debug("Model weights loaded successfully")
 
 if(correction):
-  autoencoder=Autoencoder()
+  autoencoder = Autoencoder()
+  if(datasetName=='Vaihingen'):
+    num_classes = 6
+  else:
+    num_classes = 20
+  
+  correction_input_channels = 1 + 3 + num_classes + 3
+  sample_input = np.zeros((1, cropSize, cropSize, correction_input_channels), dtype=np.float32)
+  autoencoder(sample_input, training=False)
   autoencoder.load_weights(corrCheckPointPath)
 
 tile_mse   = 0
@@ -118,6 +126,12 @@ for jp2_path in jp2_files:
     y1, y2, x1, x2 = coordinates[crop]
     prob_matrix = gaussian_kernel(cropRGB.shape[0], cropRGB.shape[1])
     dsm_output, sem_output, norm_output = net.call(cropRGB[np.newaxis, ...], training=False)
+    
+    if(correction):
+      correctionInput = tf.concat([dsm_output, norm_output, sem_output, cropRGB[np.newaxis,...]], axis=-1)
+      noise = autoencoder.call(correctionInput, training=False)
+      dsm_output = dsm_output - noise
+    
     dsm_output = dsm_output.numpy().squeeze()
     pred[0, y1:y2, x1:x2] += np.multiply(dsm_output, prob_matrix)
     pred[1, y1:y2, x1:x2] += prob_matrix
@@ -125,23 +139,33 @@ for jp2_path in jp2_files:
   gaussian = pred[1]
   pred = np.divide(pred[0], gaussian)
   pred = pred[:h, :w]
+  
+  # Scale output to meters
+  # Adjust these values based on your training data range
+  min_elevation = 0.0    # minimum elevation in your training area (meters)
+  max_elevation = 100.0  # maximum elevation for Hamburg area (meters)
+  
+  # Scale from [0,1] back to actual elevation range in meters
+  pred_meters = pred * (max_elevation - min_elevation) + min_elevation
 
   filename = os.path.splitext(os.path.basename(jp2_path))[0]
   tif_path = os.path.join(output_dir, filename + '.tif')
   
+  # Save with georeference using rasterio (using float32 for elevation data)
   with rasterio.open(
     tif_path,
     'w',
     driver='GTiff',
-    height=pred.shape[0],
-    width=pred.shape[1],
+    height=pred_meters.shape[0],
+    width=pred_meters.shape[1],
     count=1,
-    dtype=pred.dtype,
+    dtype=rasterio.float32,
     crs=crs,
     transform=transform,
-    compress='lzw'
+    compress='lzw',
+    nodata=-9999  # Set nodata value for elevation data
   ) as dst:
-    dst.write(pred, 1)
+    dst.write(pred_meters.astype(np.float32), 1)
   
   logger.info(f"Saved {tif_path} with georeference")
 
