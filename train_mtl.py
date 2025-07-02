@@ -47,14 +47,14 @@ norm_flag = True
 
 lr=0.0002
 batchSize=4
-numEpochs=20
-training_samples=1000
+numEpochs=1000
+training_samples=10000
 val_freq=100
 train_iters=int(training_samples/batchSize)
 cropSize=320
 
 predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
-corrCheckPointPath='./checkpoints/'+datasetName+'/refinement'
+corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.weights.h5'
 
 all_rgb, all_dsm, all_sem = collect_tilenames("train", datasetName)
 val_rgb, val_dsm, val_sem = collect_tilenames("val", datasetName)
@@ -68,6 +68,7 @@ net = MTL(backboneNet, datasetName)
 net.call(np.zeros((1, cropSize, cropSize, 3)), training=False)
 
 min_loss=1000
+tf.keras.backend.clear_session()
 
 for current_epoch in range(1,numEpochs):
   if(decay and current_epoch>1): lr=lr/2
