@@ -48,10 +48,13 @@ python train_mtl.py DFC2018
 ![](/images/mtl_output.png)
 
 Before training the refinement network, ensure you have a trained MTL checkpoint. Then, start training the refinement network with:
+
 ```bash
 python train_ec.py [dataset]
 ```
+
 For example, to train on the Vaihingen dataset:
+
 ```bash
 python train_ec.py Vaihingen
 ```
@@ -73,14 +76,14 @@ python test_dsm.py [dataset] [refinement_flag]
 
 - Test both prediction and refinement on the DFC2018 dataset:
       
-      ```bash
-      python test_dsm.py DFC2018 True
-      ```
+```bash
+python test_dsm.py DFC2018 True
+```
 - Test only the prediction network on the Vaihingen dataset:
       
-      ```bash
-      python test_dsm.py Vaihingen False
-      ```
+```bash
+python test_dsm.py Vaihingen False
+```
 
 The output files will be saved in the `/output` directory.
 
@@ -99,6 +102,3 @@ If you find our work useful in your research, please consider citing our [paper]
 }
 
 ```
-
-
-
