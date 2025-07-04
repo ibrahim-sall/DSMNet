@@ -30,7 +30,7 @@ def collect_tilenames(mode, dataset):
     for i in trainFrames:
       if(dataset=='Vaihingen'):
         all_rgb.append('./datasets/Vaihingen/RGB/top_mosaic_09cm_area'+str(i)+'.tif')
-        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'_normalized.jpg')
+        all_dsm.append('./datasets/Vaihingen/DSM/dsm_09cm_matching_area'+str(i)+'.tif')
         all_sem.append('./datasets/Vaihingen/SEM/top_mosaic_09cm_area'+str(i)+'.tif')
       elif(dataset=='DFC2018'):
         all_rgb.append('./datasets/DFC2018/RGB/'+i+'.tif')
@@ -41,7 +41,7 @@ def collect_tilenames(mode, dataset):
     for i in valFrames:
       if(dataset=='Vaihingen'):
         all_rgb.append('./datasets/Vaihingen/RGB/top_mosaic_09cm_area'+str(i)+'.tif')
-        all_dsm.append('./datasets/Vaihingen/NDSM/dsm_09cm_matching_area'+str(i)+'_normalized.jpg')
+        all_dsm.append('./datasets/Vaihingen/DSM/dsm_09cm_matching_area'+str(i)+'.tif')
         all_sem.append('./datasets/Vaihingen/SEM/top_mosaic_09cm_area'+str(i)+'.tif')
       elif(dataset=='DFC2018'):
         all_rgb.append('./datasets/DFC2018/RGB/'+i+'.tif')

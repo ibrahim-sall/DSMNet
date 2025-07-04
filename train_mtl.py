@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 from datetime import datetime
-from os import path
+import os
 from skimage import io
 
 import tensorflow as tf
@@ -55,6 +55,11 @@ cropSize=320
 
 predCheckPointPath='./checkpoints/'+datasetName+'/mtl.weights.h5'
 corrCheckPointPath='./checkpoints/'+datasetName+'/refinement.weights.h5'
+checkpoint_info_path = './checkpoints/'+datasetName+'/training_info.txt'
+
+
+resume_training = True
+start_epoch = 1
 
 all_rgb, all_dsm, all_sem = collect_tilenames("train", datasetName)
 val_rgb, val_dsm, val_sem = collect_tilenames("val", datasetName)
@@ -70,7 +75,25 @@ net.call(np.zeros((1, cropSize, cropSize, 3)), training=False)
 min_loss=1000
 tf.keras.backend.clear_session()
 
-for current_epoch in range(1,numEpochs):
+if resume_training and os.path.exists(predCheckPointPath):
+    print("Resuming training from checkpoint...")
+    net.load_weights(predCheckPointPath)
+    
+    if os.path.exists(checkpoint_info_path):
+        try:
+            with open(checkpoint_info_path, 'r') as f:
+                lines = f.readlines()
+                start_epoch = int(lines[0].strip().split(':')[1]) + 1
+                min_loss = float(lines[1].strip().split(':')[1])
+            print(f"Resuming from epoch {start_epoch}, best loss: {min_loss:.6f}")
+        except:
+            print("Could not read training info, starting from epoch 1")
+    else:
+        print("No training info found, starting from epoch 1")
+else:
+    print("Starting training from scratch...")
+
+for current_epoch in range(start_epoch, numEpochs + 1):
   if(decay and current_epoch>1): lr=lr/2
   optimizer = tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
@@ -169,12 +192,21 @@ for current_epoch in range(1,numEpochs):
         net.build(input_shape=(None, 320, 320, 3))
         net.save_weights(predCheckPointPath)
         min_loss=error_L1/val_freq
+        
+        os.makedirs(os.path.dirname(checkpoint_info_path), exist_ok=True)
+        with open(checkpoint_info_path, 'w') as f:
+            f.write(f"epoch:{current_epoch}\n")
+            f.write(f"min_loss:{min_loss:.10f}\n")
+            f.write(f"lr:{lr:.10f}\n")
+        
         print('dsm train checkpoint saved!')
-
-      error_ave=0.0
-      error_L1=0.0
-      error_L2=0.0
-      error_L3=0.0
+        print(f'Best loss updated: {min_loss:.6f}')
+        
+  if save and current_epoch % 10 == 0:
+      epoch_checkpoint_path = f'./checkpoints/{datasetName}/mtl_epoch_{current_epoch}.weights.h5'
+      net.build(input_shape=(None, 320, 320, 3))
+      net.save_weights(epoch_checkpoint_path)
+      print(f'Epoch {current_epoch} checkpoint saved!')
 
   error_ave=0.0
   error_L1=0.0
