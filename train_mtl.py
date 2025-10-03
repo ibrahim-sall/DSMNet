@@ -21,6 +21,7 @@ from tensorflow.keras.applications.densenet import DenseNet121
 
 from nets import *
 from utils import *
+from tqdm import tqdm
 
 import sys
 
@@ -93,7 +94,7 @@ if resume_training and os.path.exists(predCheckPointPath):
 else:
     print("Starting training from scratch...")
 
-for current_epoch in range(start_epoch, numEpochs + 1):
+for current_epoch in tqdm(range(start_epoch, numEpochs + 1), desc="Training Epochs"):
   if(decay and current_epoch>1): lr=lr/2
   optimizer = tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
@@ -105,7 +106,7 @@ for current_epoch in range(start_epoch, numEpochs + 1):
   error_L2=0.0
   error_L3=0.0
 
-  for iters in range(train_iters):
+  for iters in tqdm(range(train_iters), desc=f"Epoch {current_epoch} iterations", leave=False):
 
     idx = random.randint(0,len(all_rgb)-1)
 

@@ -21,6 +21,7 @@ from PIL import Image
 from nets import *
 from utils import *
 from tifffile import *
+from tqdm import tqdm
 
 import sys
 import logging
@@ -79,18 +80,24 @@ total_mae  = 0
 tile_time  = 0
 total_time = 0
 
-target_dir = '/home/rha/Documents/ibhou/hambourg/TDOP_20'
-jp2_files = sorted(glob.glob(target_dir + '/*.jp2'))
+target_dir = '/home/rha/Documents/ibhou/bologna/qgis/bologna_center'
+tif_files = sorted(glob.glob(target_dir + '/*.tif'))
 
-output_dir = './output/hambourg/'
+output_dir = './output/Bologna/'
 os.makedirs(output_dir, exist_ok=True)
 
-tilesLen = len(jp2_files)
+tilesLen = len(tif_files)
 
-for jp2_path in jp2_files:
-  logger.info(f"Processing {jp2_path}")
+if tilesLen == 0:
+  logger.error(f"No TIF files found in {target_dir}")
+  sys.exit(1)
+
+logger.info(f"Found {tilesLen} TIF files to process")
+
+for tif_path in tqdm(tif_files, desc="Processing TIF files"):
+  logger.info(f"Processing {tif_path}")
   
-  with rasterio.open(jp2_path) as src:
+  with rasterio.open(tif_path) as src:
     rgb_data = src.read()
     transform = src.transform
     crs = src.crs
@@ -124,13 +131,16 @@ for jp2_path in jp2_files:
 
   coordinates = []
   rgb_data = []
-  for x1, x2, y1, y2 in sliding_window(rgb_tile, step=int(cropSize/6), window_size=(cropSize,cropSize)):
+  # Use larger step size for faster processing (less precision but much faster)
+  step_size = int(cropSize/2)  # Changed from cropSize/6 to cropSize/2 for ~9x fewer crops
+  for x1, x2, y1, y2 in sliding_window(rgb_tile, step=step_size, window_size=(cropSize,cropSize)):
     coordinates.append([y1, y2, x1, x2])
     rgb_data.append(rgb_tile[y1:y2, x1:x2, :])
-  logger.debug(f"Generated {len(rgb_data)} crops for sliding window inference")
+  logger.debug(f"Generated {len(rgb_data)} crops for sliding window inference with step size {step_size}")
 
   pred = np.zeros([2, h, w])
-  for crop in range(len(rgb_data)):
+  sem_pred = np.zeros([2, h, w, num_classes])
+  for crop in tqdm(range(len(rgb_data)), desc=f"Processing crops for {os.path.basename(tif_path)}", leave=False):
     cropRGB = rgb_data[crop]
     y1, y2, x1, x2 = coordinates[crop]
     prob_matrix = gaussian_kernel(cropRGB.shape[0], cropRGB.shape[1])
@@ -148,20 +158,46 @@ for jp2_path in jp2_files:
       logger.debug("Applied correction to dsm_output")
 
     dsm_output = dsm_output.numpy().squeeze()
+    sem_output_np = sem_output.numpy().squeeze()
+    
+    # Accumulate DSM predictions
     pred[0, y1:y2, x1:x2] += np.multiply(dsm_output, prob_matrix)
     pred[1, y1:y2, x1:x2] += prob_matrix
+    
+    # Accumulate semantic predictions
+    for c in range(num_classes):
+      sem_pred[0, y1:y2, x1:x2, c] += np.multiply(sem_output_np[:, :, c], prob_matrix)
+    sem_pred[1, y1:y2, x1:x2, :] += prob_matrix[:, :, np.newaxis]
 
   gaussian = pred[1]
   pred = np.divide(pred[0], gaussian)
   pred = pred[:h, :w]
-  logger.debug(f"Final prediction shape: {pred.shape}")
+  logger.debug(f"Final DSM prediction shape: {pred.shape}")
+  
+  # Process semantic segmentation
+  sem_gaussian = sem_pred[1]
+  sem_final = np.divide(sem_pred[0], sem_gaussian)
+  sem_final = sem_final[:h, :w, :]
+  
+  # Get building class (assuming buildings are class 5 for Vaihingen dataset)
+  if datasetName == 'Vaihingen':
+    building_class_idx = 5  # Building class for Vaihingen
+  else:
+    building_class_idx = 1  # Adjust for other datasets
+  
+  # Create building footprint mask
+  building_footprint = np.argmax(sem_final, axis=2) == building_class_idx
+  logger.debug(f"Final semantic prediction shape: {sem_final.shape}")
+  logger.debug(f"Building footprint shape: {building_footprint.shape}")
 
-  filename = os.path.splitext(os.path.basename(jp2_path))[0]
-  tif_path = os.path.join(output_dir, filename + '.tif')
+  filename = os.path.splitext(os.path.basename(tif_path))[0]
+  output_tif_path = os.path.join(output_dir, filename + '.tif')
+  building_output_path = os.path.join(output_dir, filename + '_buildings.tif')
+  semantic_output_path = os.path.join(output_dir, filename + '_semantic_rgb.tif')
 
-  # Save with georeference
+  # Save DSM with georeference
   with rasterio.open(
-    tif_path,
+    output_tif_path,
     'w',
     driver='GTiff',
     height=pred.shape[0],
@@ -173,9 +209,57 @@ for jp2_path in jp2_files:
     compress='lzw',
     nodata=-9999) as dst:
     dst.write(pred.astype(np.float32), 1)
-    logger.debug(f"Written prediction to {tif_path}")
+    logger.debug(f"Written DSM prediction to {output_tif_path}")
 
-  logger.info(f"Saved {tif_path} with georeference")
+  # Save building footprints
+  with rasterio.open(
+    building_output_path,
+    'w',
+    driver='GTiff',
+    height=building_footprint.shape[0],
+    width=building_footprint.shape[1],
+    count=1,
+    dtype=rasterio.uint8,
+    crs=crs,
+    transform=transform,
+    compress='lzw') as dst:
+    dst.write(building_footprint.astype(np.uint8), 1)
+    logger.debug(f"Written building footprints to {building_output_path}")
+
+  # Save semantic RGB visualization
+  if datasetName == 'Vaihingen':
+    color_map = np.array([
+      [255, 255, 255],  
+      [0, 0, 255],      
+      [0, 255, 255],    
+      [0, 255, 0],      
+      [255, 255, 0],    
+      [255, 0, 0]       
+    ])
+  else:
+    color_map = np.random.randint(0, 255, (num_classes, 3))
+  
+  class_map = np.argmax(sem_final, axis=2)
+  semantic_rgb = color_map[class_map]
+  
+  with rasterio.open(
+    semantic_output_path,
+    'w',
+    driver='GTiff',
+    height=semantic_rgb.shape[0],
+    width=semantic_rgb.shape[1],
+    count=3,
+    dtype=rasterio.uint8,
+    crs=crs,
+    transform=transform,
+    compress='lzw') as dst:
+    for i in range(3):
+      dst.write(semantic_rgb[:, :, i].astype(np.uint8), i+1)
+    logger.debug(f"Written semantic RGB to {semantic_output_path}")
+
+  logger.info(f"Saved DSM: {output_tif_path}")
+  logger.info(f"Saved buildings: {building_output_path}")  
+  logger.info(f"Saved semantic RGB: {semantic_output_path}")
 
 logger.info("Final MSE loss  : " + str(total_mse/tilesLen))
 logger.info("Final MAE loss  : " + str(total_mae/tilesLen))

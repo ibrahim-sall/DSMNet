@@ -19,6 +19,7 @@ from tensorflow.keras.applications.densenet import DenseNet121
 
 from nets import *
 from utils import *
+from tqdm import tqdm
 
 import sys
 import logging
@@ -75,11 +76,11 @@ optimizer=tf.keras.optimizers.Adam(learning_rate=lr, beta_1=0.9)
 
 min_loss=1000
 
-for epoch in range(1,numEpochs):
+for epoch in tqdm(range(1,numEpochs), desc="Training Epochs"):
 
   print('Current epoch: ' + str(epoch))
 
-  for iters in range(train_iters):
+  for iters in tqdm(range(train_iters), desc=f"Epoch {epoch} iterations", leave=False):
 
     idx = random.randint(0,len(all_rgb)-1)
 
